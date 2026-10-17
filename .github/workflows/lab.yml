@@ -1,0 +1,34 @@
+# The lab: lint, tests, and the query plan check (chapter 07).
+name: Lab
+
+on:
+  push:
+    branches: [main]
+    paths: ['lab/**', '.github/workflows/lab.yml']
+  pull_request:
+    paths: ['lab/**', '.github/workflows/lab.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: lab
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: pipx install uv==0.11.3
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest
+      - name: Query plans (no full scans, no temp sorts)
+        run: uv run python -m shop --indexes solutions/indexes.sql check
