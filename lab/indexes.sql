@@ -1,0 +1,2 @@
+-- Your indexes. `python -m shop bench` runs this file after loading the data.
+-- Chapter 03 adds the first one. Run bench again after every change.
